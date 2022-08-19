@@ -1,0 +1,16 @@
+domain: app.io
+layout:
+- go.kubebuilder.io/v3
+projectName: application
+repo: github.com/application-io/application
+resources:
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: app.io
+  group: applications
+  kind: Application
+  path: github.com/application-io/application/api/v1beta1
+  version: v1beta1
+version: "3"
