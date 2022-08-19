@@ -26,7 +26,7 @@ import (
 // TODO change me
 // controllerKind contains the schema.GroupVersionKind for this controller type.
 var controllerKind = schema.GroupVersionKind{
-	Group:   "applications.app.io.applications.app.io",
+	Group:   "applications.app.io",
 	Version: "v1beta1",
 	Kind:    "Appliction",
 }
