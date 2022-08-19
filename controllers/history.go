@@ -23,7 +23,6 @@ import (
 	appv1beta1 "github.com/application-io/application/api/v1beta1"
 )
 
-// TODO change me
 // controllerKind contains the schema.GroupVersionKind for this controller type.
 var controllerKind = schema.GroupVersionKind{
 	Group:   "applications.app.io",
@@ -31,6 +30,7 @@ var controllerKind = schema.GroupVersionKind{
 	Kind:    "Appliction",
 }
 
+// constructHistory ensure ControllerRevision, it return current controllerRevision and history controllerRevision
 func (r *ApplicationReconciler) constructHistory(ctx context.Context, app *appv1beta1.Application) (*apps.ControllerRevision, []*apps.ControllerRevision, error) {
 	logger := log.FromContext(ctx)
 
@@ -78,7 +78,7 @@ func (r *ApplicationReconciler) constructHistory(ctx context.Context, app *appv1
 			return nil, nil, err
 		}
 	default:
-		cur, err := r.dedupCurHistories(ctx, app, currentHistories)
+		cur, err := r.dedupCurHistories(ctx, currentHistories)
 		if err != nil {
 			return nil, nil, err
 		}
@@ -96,6 +96,7 @@ func (r *ApplicationReconciler) constructHistory(ctx context.Context, app *appv1
 	return cur, olds, nil
 }
 
+// cleanupHistory clean up history by application revisionHistoryLimit
 func (r *ApplicationReconciler) cleanupHistory(ctx context.Context, app *appv1beta1.Application, olds []*apps.ControllerRevision) error {
 
 	toKeep := int(*app.Spec.RevisionHistoryLimit)
@@ -120,12 +121,12 @@ func (r *ApplicationReconciler) cleanupHistory(ctx context.Context, app *appv1be
 	return nil
 }
 
+// snapshot create controllerRevision by current application
 func (r *ApplicationReconciler) snapshot(ctx context.Context, app *appv1beta1.Application, revision int64) (*apps.ControllerRevision, error) {
 	patch, err := getPatch(app)
 	if err != nil {
 		return nil, err
 	}
-	// TODO change me
 	hash := ComputeHash(app.Spec)
 	name := app.Name + "-" + hash
 	history := &apps.ControllerRevision{
@@ -161,7 +162,8 @@ func (r *ApplicationReconciler) snapshot(ctx context.Context, app *appv1beta1.Ap
 	return history, err
 }
 
-func (r *ApplicationReconciler) dedupCurHistories(ctx context.Context, app *appv1beta1.Application, curHistories []*apps.ControllerRevision) (*apps.ControllerRevision, error) {
+// dedupCurHistories return the max revision controllerRevision
+func (r *ApplicationReconciler) dedupCurHistories(ctx context.Context, curHistories []*apps.ControllerRevision) (*apps.ControllerRevision, error) {
 	if len(curHistories) == 1 {
 		return curHistories[0], nil
 	}
@@ -196,6 +198,7 @@ func Match(app *appv1beta1.Application, history *apps.ControllerRevision) (bool,
 	return bytes.Equal(patch, history.Data.Raw), nil
 }
 
+// getPatch returns the resource section of interest
 func getPatch(ds *appv1beta1.Application) ([]byte, error) {
 	dsBytes, err := json.Marshal(ds)
 	if err != nil {
@@ -227,7 +230,7 @@ func maxRevision(histories []*apps.ControllerRevision) int64 {
 	return max
 }
 
-// GeneratePolicyName will generate work name by its name and the hash of its name and resource selectors.
+// ComputeHash will generate hash of controllerRevision name
 func ComputeHash(appSpec appv1beta1.ApplicationSpec) string {
 	data, _ := json.Marshal(appSpec)
 	hash := fnv.New32a()
@@ -243,7 +246,7 @@ func DeepHashObject(hasher hash.Hash, objectToWrite interface{}) {
 	pretty.Fprintf(hasher, "%# v", objectToWrite)
 }
 
-// Clones the given map and returns a new map with the given key and value added.
+// CloneAndAddLabel clone the given map and returns a new map with the given key and value added.
 // Returns the given map, if labelKey is empty.
 func CloneAndAddLabel(labels map[string]string, labelKey, labelValue string) map[string]string {
 	if labelKey == "" {
@@ -259,6 +262,7 @@ func CloneAndAddLabel(labels map[string]string, labelKey, labelValue string) map
 	return newLabels
 }
 
+//historiesByRevision implementing the sorting interface
 type historiesByRevision []*apps.ControllerRevision
 
 func (h historiesByRevision) Len() int      { return len(h) }
