@@ -45,7 +45,7 @@ func (r *ApplicationReconciler) constructHistory(ctx context.Context, app *appv1
 	}
 
 	var olds, currentHistories []*apps.ControllerRevision
-	for _, history := range histories.Items {
+	for index, history := range histories.Items {
 		// Add the unique label if it's not already added to the history
 		// We use history name instead of computing hash, so that we don't need to worry about hash collision
 		if _, ok := history.Labels[apps.DefaultDaemonSetUniqueLabelKey]; !ok {
@@ -63,9 +63,9 @@ func (r *ApplicationReconciler) constructHistory(ctx context.Context, app *appv1
 			return nil, nil, err
 		}
 		if found {
-			currentHistories = append(currentHistories, &history)
+			currentHistories = append(currentHistories, &histories.Items[index])
 		} else {
-			olds = append(olds, &history)
+			olds = append(olds, &histories.Items[index])
 		}
 	}
 
