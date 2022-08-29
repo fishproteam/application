@@ -20,6 +20,8 @@ import (
 	"context"
 	"fmt"
 
+	appsv1 "k8s.io/api/apps/v1"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/equality"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -42,9 +44,10 @@ type ApplicationReconciler struct {
 	Scheme *runtime.Scheme
 }
 
-//+kubebuilder:rbac:groups=applications.app.io.applications.app.io,resources=applications,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=applications.app.io.applications.app.io,resources=applications/status,verbs=get;update;patch
-//+kubebuilder:rbac:groups=applications.app.io.applications.app.io,resources=applications/finalizers,verbs=update
+//+kubebuilder:rbac:groups=applications.app.io,resources=applications,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=applications.app.io,resources=applications/status,verbs=get;update;patch
+//+kubebuilder:rbac:groups=applications.app.io,resources=applications/finalizers,verbs=update
+//+kubebuilder:rbac:groups=*,resources=*,verbs=get;list;watch;create;update;patch;delete
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
@@ -71,12 +74,6 @@ func (r *ApplicationReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 
 	if app.DeletionTimestamp != nil {
 		return ctrl.Result{}, nil
-	}
-
-	// fixme change this in webhook in the feature
-	defaultHistoryLimit := int32(10)
-	if app.Spec.RevisionHistoryLimit == nil {
-		app.Spec.RevisionHistoryLimit = &defaultHistoryLimit
 	}
 
 	_, olds, err := r.constructHistory(ctx, &app)
@@ -238,5 +235,8 @@ func aggregateReady(objectStatuses []appv1beta1.ResourceStatus) (bool, int) {
 func (r *ApplicationReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&appv1beta1.Application{}).
+		Owns(&appsv1.Deployment{}).
+		Owns(&appsv1.StatefulSet{}).
+		Owns(&corev1.Pod{}).
 		Complete(r)
 }

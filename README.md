@@ -2,7 +2,7 @@
 We've been thinking about what an application is, and an application can be a Git repository or it can be a Helm Chart. After investigation, we believe that the application is a combination of resources, any resources in the namespace can be used as a part of the application. This operator provides an application controller and aggregates application status based on the resources contained in the application
 
 ## Description
-Application monitors changes in Application, Deployment, StatefuleSet, ConfigMap, and Secret resources, adjusts applications, and aggregates application states
+Application monitors changes in Application, Deployment, StatefuleSet and Pod resources, adjusts applications, and aggregates application states
 
 ## Getting Started
 You’ll need a Kubernetes cluster to run against. You can use [KIND](https://sigs.k8s.io/kind) to get a local cluster for testing, or run against a remote cluster.
