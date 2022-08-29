@@ -17,6 +17,8 @@ limitations under the License.
 package v1beta1
 
 import (
+	"fmt"
+
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -82,7 +84,7 @@ func (r *Application) ValidateDelete() error {
 func (r *Application) validateApplication() error {
 	var allErrs field.ErrorList
 
-	if *r.Spec.RevisionHistoryLimit > 100 {
+	if *r.Spec.RevisionHistoryLimit > 50 {
 		applicationlog.Info("c. Invalid revisionHistoryLimit")
 
 		err := field.Invalid(field.NewPath("spec").Child("revisionHistoryLimit"),
@@ -90,7 +92,19 @@ func (r *Application) validateApplication() error {
 			"d. must be less than 100")
 
 		allErrs = append(allErrs, err)
+	}
 
+	if len(r.Spec.Resources) > 50 {
+		applicationlog.Info("c. Invalid resources")
+
+		err := field.Invalid(field.NewPath("spec").Child("resources"),
+			fmt.Sprintf("the number of resources is %d", len(r.Spec.Resources)),
+			"d. the number of resources must be less than 50")
+
+		allErrs = append(allErrs, err)
+	}
+
+	if len(allErrs) != 0 {
 		return apierrors.NewInvalid(
 			schema.GroupKind{Group: "application.app.io", Kind: "Application"},
 			r.Name,
