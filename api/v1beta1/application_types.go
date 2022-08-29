@@ -220,12 +220,12 @@ type ResourceReference struct {
 }
 
 //+kubebuilder:object:root=true
-// +kubebuilder:resource:categories=all,shortName=app
+//+kubebuilder:resource:categories=all,shortName=app
 //+kubebuilder:subresource:status
-// +kubebuilder:printcolumn:name="Type",type=string,description="The type of the application",JSONPath=`.spec.descriptor.type`,priority=0
-// +kubebuilder:printcolumn:name="Version",type=string,description="The creation date",JSONPath=`.spec.descriptor.version`,priority=0
-// +kubebuilder:printcolumn:name="Ready",type=string,description="Numbers of components ready",JSONPath=`.status.componentsReady`,priority=0
-// +kubebuilder:printcolumn:name="Age",type=date,description="The creation date",JSONPath=`.metadata.creationTimestamp`,priority=0
+//+kubebuilder:printcolumn:name="Type",type=string,description="The type of the application",JSONPath=`.spec.descriptor.type`,priority=0
+//+kubebuilder:printcolumn:name="Version",type=string,description="The creation date",JSONPath=`.spec.descriptor.version`,priority=0
+//+kubebuilder:printcolumn:name="Ready",type=string,description="Numbers of components ready",JSONPath=`.status.componentsReady`,priority=0
+//+kubebuilder:printcolumn:name="Age",type=date,description="The creation date",JSONPath=`.metadata.creationTimestamp`,priority=0
 
 // Application is the Schema for the applications API
 type Application struct {
