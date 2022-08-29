@@ -76,6 +76,113 @@ make manifests
 
 More information can be found via the [Kubebuilder Documentation](https://book.kubebuilder.io/introduction.html)
 
+## example
+
+Deploy a simple application
+```sh
+~ cat > app.yaml << EOF | kubectl create -f -
+apiVersion: applications.app.io/v1beta1
+kind: Application
+metadata:
+  name: application-sample
+spec:
+  revisionHistoryLimit: 10
+  resources:
+    - apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        labels:
+          ccnp.cib/app: nginx-deploy
+        name: nginx-deploy
+        namespace: l002x0
+      spec:
+        replicas: 2
+        selector:
+          matchLabels:
+            ccnp.cib/component: nginx-deploy
+        template:
+          metadata:
+            labels:
+              ccnp.cib/app: nginx-deploy
+              ccnp.cib/component: nginx-deploy
+          spec:
+            containers:
+              - image: nginx:latest
+                imagePullPolicy: Always
+                name: nginx-deploy
+                resources:
+                  limits:
+                    cpu: 128m
+                    memory: "67108864"
+                  requests:
+                    cpu: 64m
+                    memory: "67108864"
+    - apiVersion: v1
+      kind: Service
+      metadata:
+        labels:
+          ccnp.cib/app: nginx-deploy
+        name: nginx-deploy
+        namespace: l002x0
+      spec:
+        ports:
+          - name: nginx-deploy
+            port: 80
+            protocol: TCP
+            targetPort: 80
+        selector:
+          ccnp.cib/component: nginx-deploy
+        sessionAffinity: None
+        type: ClusterIP
+  selector: {}
+  descriptor:
+    type: "nginx"
+    keywords:
+      - "cms"
+      - "blog"
+    links:
+      - description: About
+        url: "https://wordpress.org/"
+      - description: Web Server Dashboard
+        url: "https://metrics/internal/wordpress-01/web-app"
+      - description: Mysql Dashboard
+        url: "https://metrics/internal/wordpress-01/mysql"
+    version: "4.9.4"
+    description: "WordPress is open source software you can use to create a beautiful website, blog, or app."
+    icons:
+      - src: "https://s.w.org/style/images/about/WordPress-logotype-wmark.png"
+        type: "image/png"
+        size: "1000x1000"
+      - src: "https://s.w.org/style/images/about/WordPress-logotype-standard.png"
+        type: "image/png"
+        size: "2000x680"
+    maintainers:
+      - name: Wordpress Dev
+        email: dev@wordpress.org
+    owners:
+      - name: Wordpress Admin
+        email: admin@wordpress.org
+EOF
+application.applications.app.io/application-sample created
+~ kubectl get all
+NAME                                READY   STATUS    RESTARTS   AGE
+pod/nginx-deploy-78689459cd-dswfv   1/1     Running   0          60s
+pod/nginx-deploy-78689459cd-gl7vm   1/1     Running   0          60s
+
+NAME                   TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)   AGE
+service/kubernetes     ClusterIP   10.96.0.1       <none>        443/TCP   92m
+service/nginx-deploy   ClusterIP   10.96.146.165   <none>        80/TCP    60s
+
+NAME                           READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/nginx-deploy   2/2     2            2           60s
+
+NAME                                      DESIRED   CURRENT   READY   AGE
+replicaset.apps/nginx-deploy-78689459cd   2         2         2       60s
+
+NAME                                                 TYPE    VERSION   READY   AGE
+application.applications.app.io/application-sample   nginx   4.9.4     2/2     60s
+```
+
 ## License
 
 Copyright 2022.
