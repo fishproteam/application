@@ -80,7 +80,7 @@ More information can be found via the [Kubebuilder Documentation](https://book.k
 
 Deploy a simple application
 ```sh
-~ cat > app.yaml << EOF | kubectl create -f -
+~ cat <<EOF | kubectl create -f -
 apiVersion: applications.app.io/v1beta1
 kind: Application
 metadata:
