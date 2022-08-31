@@ -14,7 +14,6 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/rand"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -22,13 +21,6 @@ import (
 
 	appv1beta1 "github.com/application-io/application/api/v1beta1"
 )
-
-// controllerKind contains the schema.GroupVersionKind for this controller type.
-var controllerKind = schema.GroupVersionKind{
-	Group:   "applications.app.io",
-	Version: "v1beta1",
-	Kind:    "Appliction",
-}
 
 // constructHistory ensure ControllerRevision, it return current controllerRevision and history controllerRevision
 func (r *ApplicationReconciler) constructHistory(ctx context.Context, app *appv1beta1.Application) (*apps.ControllerRevision, []*apps.ControllerRevision, error) {
@@ -135,7 +127,7 @@ func (r *ApplicationReconciler) snapshot(ctx context.Context, app *appv1beta1.Ap
 			Namespace:       app.Namespace,
 			Labels:          CloneAndAddLabel(app.Labels, apps.ControllerRevisionHashLabelKey, hash),
 			Annotations:     app.Annotations,
-			OwnerReferences: []metav1.OwnerReference{*metav1.NewControllerRef(app, controllerKind)},
+			OwnerReferences: []metav1.OwnerReference{*metav1.NewControllerRef(app, appv1beta1.GroupVersion.WithKind("Application"))},
 		},
 		Data:     runtime.RawExtension{Raw: patch},
 		Revision: revision,
