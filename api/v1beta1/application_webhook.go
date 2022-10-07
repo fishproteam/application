@@ -81,7 +81,7 @@ func (r *Application) ValidateDelete() error {
 }
 
 func (r *Application) validateApplication() error {
-	var allErrs field.ErrorList
+	var errs field.ErrorList
 
 	if *r.Spec.RevisionHistoryLimit > 50 {
 		applicationlog.Info("c. Invalid revisionHistoryLimit")
@@ -90,7 +90,7 @@ func (r *Application) validateApplication() error {
 			*r.Spec.RevisionHistoryLimit,
 			"d. must be less than 100")
 
-		allErrs = append(allErrs, err)
+		errs = append(errs, err)
 	}
 
 	if len(r.Spec.Resources) > 50 {
@@ -100,14 +100,14 @@ func (r *Application) validateApplication() error {
 			fmt.Sprintf("the number of resources is %d", len(r.Spec.Resources)),
 			"d. the number of resources must be less than 50")
 
-		allErrs = append(allErrs, err)
+		errs = append(errs, err)
 	}
 
-	if len(allErrs) != 0 {
+	if len(errs) != 0 {
 		return apierrors.NewInvalid(
 			GroupVersion.WithKind("Application").GroupKind(),
 			r.Name,
-			allErrs)
+			errs)
 	}
 	return nil
 }
